@@ -18,10 +18,10 @@ import QUANTAXIS.QAFactor.utils as utils
 # JQ_PASSWORD = input('JQDATA_PASSWORD: ')
 # jqdatasdk.auth(JQ_USERNAME, JQ_PASSWORD)
 
-# code_list = QA.QA_fetch_stock_block_adv().get_block(
-#     "白酒").index.get_level_values("code").tolist()
-code_list = QA.QA_fetch_stock_block_adv(
-).get_block("中证200").index.get_level_values("code").tolist()
+code_list = QA.QA_fetch_stock_block_adv().get_block(
+    "白酒").index.get_level_values("code").tolist()
+# code_list = QA.QA_fetch_stock_block_adv(
+# ).get_block("中证200").index.get_level_values("code").tolist()
 df_finance = QA.QA_fetch_financial_report_adv(
     code=code_list,
     start='2016-01-01',

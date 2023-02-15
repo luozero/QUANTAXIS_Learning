@@ -35,7 +35,7 @@ class QABacktestSimple_Test(unittest.TestCase):
         self.Account.reset_assets(1000000)
         self.Account.account_cookie = 'user_admin_macd'
 
-        # get data from mongodb
+        # get data from mongodbn
         self.data = QA.QA_fetch_stock_day_adv(
             ['000001', '000002', '000004', '600000'], '2017-09-01', '2018-05-20')
         self.data = self.data.to_qfq()
@@ -76,7 +76,7 @@ class QABacktestSimple_Test(unittest.TestCase):
 
         for items in self.data_forbacktest.panel_gen:
             for item in items.security_gen:
-                daily_ind = self.ind.loc[item.index]
+                daily_ind = self.hahahahind.loc[item.index]
                 if daily_ind.CROSS_JC.iloc[0] > 0:
                     order = self.Account.send_order(
                         code=item.code[0],

@@ -27,7 +27,7 @@ class BollingerBandsStrategy(QA_Strategy):
     '''
 
     def __init__(self, code, start, end):
-        super().__init__()
+        super().__init__(user_cookie = "test_user", portfolio_cookie = "test_portfolio")
         self.frequence = FREQUENCE.DAY
         self.market_type = MARKET_TYPE.STOCK_CN
         self.backtest_stock_code = code

@@ -19,7 +19,7 @@ from QUANTAXIS.QAUtil.QAParameter import (AMOUNT_MODEL, DATASOURCE, FREQUENCE,
 
 class MAStrategy(QA_Strategy):
     def __init__(self):
-        super().__init__()
+        super().__init__(user_cookie = "test_user", portfolio_cookie = "test_portfolio")
         self.frequence = FREQUENCE.DAY
         self.market_type = MARKET_TYPE.STOCK_CN
 
