@@ -33,6 +33,8 @@ from QUANTAXIS.QAUtil.QADate_trade import QA_util_get_pre_trade_date
 from QUANTAXIS.QAUtil.QASql import ASCENDING, DESCENDING
 from QUANTAXIS.QAUtil.QATransform import QA_util_to_json_from_pandas
 
+from QUANTAXIS.QAFetch.QAStockInfo import QA_get_stock_basic
+
 
 def QA_ts_update_all(
     start: Union[str, datetime.datetime] = None,
@@ -348,19 +350,22 @@ def QA_ts_update_stock_basic():
     )
 
     # 初始化数据接口
-    pro = get_pro()
+    # pro = get_pro()
     # 获取所有数据
-    df_1 = pro.stock_basic(exchange="", list_status="L")
-    df_2 = pro.stock_basic(exchange="", list_status="P")
-    df_3 = pro.stock_basic(exchange="", list_status="D")
-    df_1["status"] = "L"
-    df_2["status"] = "P"
-    df_3["status"] = "D"
-    df = df_1.append(df_2).append(df_3)
-    df["code"] = QA_fmt_code_list(df.ts_code)
+    # df_1 = pro.stock_basic(exchange="", list_status="L") 
+    # df_2 = pro.stock_basic(exchange="", list_status="P")
+    # df_3 = pro.stock_basic(exchange="", list_status="D")
+    # df_1["status"] = "L"
+    # df_2["status"] = "P"
+    # df_3["status"] = "D"
+    # df = df_1.append(df_2).append(df_3)
+
+    df = QA_get_stock_basic()
+    df["status"] = "L"
+    df["code"] = QA_fmt_code_list(df.code)
     df["list_date_stamp"] = df.list_date.apply(QA_util_date_stamp)
     df = df.where(pd.notnull(df), None)
-    js = QA_util_to_json_from_pandas(df.drop(columns=["ts_code", "symbol"]))
+    js = QA_util_to_json_from_pandas(df)
     for item in js:
         qry = {
             "code": item["code"],
@@ -543,6 +548,6 @@ if __name__ == "__main__":
     # QA_ts_update_all()
     # QA_ts_update_inc()
     # QA_ts_update_industry()
-    # QA_ts_update_stock_basic()
+    QA_ts_update_stock_basic()
     # QA_ts_update_namechange()
-    QA_ts_update_daily_basic()
+    # QA_ts_update_daily_basic()

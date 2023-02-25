@@ -494,11 +494,11 @@ class CLI(cmd.Cmd):
                     QA_Setting().client.quantaxis.user_list.insert(
                         {"username": "admin", "password": "admin"}
                     )
-                QA_ts_update_inc()
+                # QA_ts_update_inc()
                 QA_ts_update_stock_basic()
-                QA_ts_update_namechange()
-                QA_ts_update_industry()
-                QA_ts_update_daily_basic()
+                # QA_ts_update_namechange()
+                # QA_ts_update_industry()
+                # QA_ts_update_daily_basic()
             elif len(arg) == 1 and arg[0] == "ts_financial":
                 if (
                     QA_Setting()
