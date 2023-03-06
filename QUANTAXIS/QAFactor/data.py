@@ -436,7 +436,7 @@ class DataApi:
         # stock_list = utils.QA_fmt_code_list(code_list, style="jq")
         # df_local = jqdatasdk.get_all_securities(types="stock")
         stock_list = utils.QA_fmt_code_list(code_list)
-        df_local = QA_fetch_stock_basic(status=None).set_index("code")
+        df_local = QA_fetch_stock_basic(status=None)
         intersection = list(df_local.index.intersection(stock_list))
         ss = df_local.loc[intersection]["list_date"]
         # ss.index = ss.index.map(lambda x: x[:6])

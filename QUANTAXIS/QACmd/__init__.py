@@ -496,6 +496,8 @@ class CLI(cmd.Cmd):
                     )
                 # QA_ts_update_inc()
                 QA_ts_update_stock_basic()
+                QA_ts_update_industry()
+
                 # QA_ts_update_namechange()
                 # QA_ts_update_industry()
                 # QA_ts_update_daily_basic()

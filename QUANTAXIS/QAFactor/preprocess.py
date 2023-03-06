@@ -431,7 +431,7 @@ def QA_fetch_factor_start_date(factor: pd.Series) -> pd.DataFrame:
         factor.index.get_level_values("code").drop_duplicates()
     )
     # 上市时间获取
-    df_local = QA_fetch_stock_basic(status=None).set_index("code")
+    df_local = QA_fetch_stock_basic(status=None)
     intersection = df_local.index.intersection(stock_list)
     ss = df_local.loc[intersection]["list_date"]
     # 拼接上市时间

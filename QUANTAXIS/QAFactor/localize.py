@@ -13,6 +13,7 @@ from typing import List, Tuple, Union
 import pandas as pd
 import pymongo
 import tushare as ts
+import akshare as ak
 
 from QUANTAXIS.QAFactor.fetcher import (REPORT_DATE_TAILS, REPORT_TYPE,
                                         SHEET_TYPE,
@@ -436,7 +437,7 @@ def QA_ts_update_industry(
     """
     保存个股行业信息
     """
-    pro = get_pro()
+    # pro = get_pro()
     if isinstance(level, str):
         level = [level]
     if isinstance(src, str):
@@ -445,42 +446,62 @@ def QA_ts_update_industry(
     for s in src:
         for lv in level:
             try:
-                df_tmp = pro.index_classify(level=lv, src=s)
+                if lv == "L1":
+                  df_tmp = ak.sw_index_first_info()
+                elif lv == "L2":
+                  df_tmp = ak.sw_index_second_info()
+                elif lv == "L3":
+                  df_tmp = ak.sw_index_third_info()
                 df_tmp["src"] = "sw"
-                df_industry = df_industry.append(df_tmp)
+                df_tmp["level"] = lv
+                df_industry = pd.concat([df_industry, df_tmp])
             except Exception as e1:
                 print(e1)
                 time.sleep(61)
-                try:
-                    df_tmp = pro.index_classify(level=lv, src=s)
-                    df_tmp["src"] = "sw"
-                    df_industry = df_industry.append(df_tmp)
-                except Exception as e2:
-                    raise ValueError(e2)
+                if lv == "L1":
+                  df_tmp = ak.sw_index_first_info()
+                elif lv == "L2":
+                  df_tmp = ak.sw_index_second_info()
+                elif lv == "L3":
+                  df_tmp = ak.sw_index_third_info()
+                df_tmp["src"] = "sw"
+                df_tmp["level"] = lv
+                df_industry = pd.concat([df_industry, df_tmp])
+    
+    df_industry.columns = ["index_code", "industry_name", "num_stocks", "PE", "PE(TTM)", "PB", "dividened", "src", "level"]
+
     df_results = pd.DataFrame()
     for idx, item in df_industry.iterrows():
         if idx % 100 == 0:
             print(f"currently saving {idx}th record")
         try:
-            df_tmp = pro.index_member(index_code=item["index_code"])
+            df_tmp = ak.sw_index_third_cons(item["index_code"])
             df_tmp["industry_name"] = item["industry_name"]
             df_tmp["level"] = item["level"].lower()
             df_tmp["src"] = item["src"].lower()
-            df_results = df_results.append(df_tmp)
+            df_tmp = df_tmp.rename(columns={"股票代码": "con_code", "纳入时间": "in_date"})
+            df_results = pd.concat([df_results, df_tmp], axis = 0)
         except Exception as e1:
             print(e1)
             time.sleep(61)
             try:
-                df_tmp = pro.index_member(index_code=item["index_code"])
+                df_tmp = ak.sw_index_third_cons(item["index_code"])
                 df_tmp["industry_name"] = item["industry_name"]
                 df_tmp["level"] = item["level"].lower()
                 df_tmp["src"] = item["src"].lower()
-                df_results = df_results.append(df_tmp)
+                df_tmp = df_tmp.rename(columns={"股票代码": "con_code", "纳入时间": "in_date"})
+                df_results = pd.concat([df_results, df_tmp], axis = 0)
             except Exception as e2:
                 raise ValueError(e2)
     df_results.con_code = QA_fmt_code_list(df_results.con_code)
-    df_results = df_results.rename(columns={"con_code": "code"})
+    df_results = df_results.rename(columns={"con_code": "code", "股票简称": "name", "申万1级":"SW_1", "申万2级":"SW_2", "申万3级":"SW_3", "价格":"price",
+     "市盈率":"PE", "市盈率ttm":"PE(TTM)", "股息率":"dividend_rate", "市值":"market_value",
+    "归母净利润同比增长(09-30)":"profit_increase_ratio(09-30)",
+    "归母净利润同比增长(06-30)":"profit_increase_ratio(06-30)",
+    "营业收入同比增长(09-30)":"revenue_increase_ratio(09-30)",
+    "营业收入同比增长(06-30)":"revenue_increase_ratio(06-30)"})
     df_results = df_results.sort_values(by="code")
+    df_results['out_date'] = False
     coll = DATABASE.industry
     coll.create_index(
         [
@@ -496,6 +517,7 @@ def QA_ts_update_industry(
         item["in_date_stamp"] = QA_util_date_stamp(item["in_date"])
         if not item["out_date"]:
             item["out_date_stamp"] = 9999999999
+            item["out_date"] = 9999999999
         else:
             item["out_date_stamp"] = QA_util_date_stamp(item["out_date_stamp"])
         coll.update_one(
@@ -547,7 +569,7 @@ def QA_ts_update_daily_basic():
 if __name__ == "__main__":
     # QA_ts_update_all()
     # QA_ts_update_inc()
-    # QA_ts_update_industry()
-    QA_ts_update_stock_basic()
+    QA_ts_update_industry("L1")
+    # QA_ts_update_stock_basic()
     # QA_ts_update_namechange()
     # QA_ts_update_daily_basic()
