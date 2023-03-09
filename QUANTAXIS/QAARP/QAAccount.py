@@ -2053,7 +2053,7 @@ class QA_Account(QA_Worker):
             """
 
             self._currenttime = event.market_data.datetime[0]
-            if self._market_data is None:
+            if len(self._market_data) == 0:
                 self._market_data = event.market_data
             else:
                 self._market_data = self._market_data + event.market_data
