@@ -406,14 +406,18 @@ def QA_fetch_get_factor_start_date(factor: pd.Series) -> pd.DataFrame:
     merged_data = pd.DataFrame(factor.rename("factor"))
     # 股票代码格式化
     stock_list = QA_fmt_code_list(
-        factor.index.get_level_values("code").drop_duplicates(),
-        style="jq"
+        factor.index.get_level_values("code").drop_duplicates()
+        # style="jq"
     )
     # 上市时间获取
-    df_local = jqdatasdk.get_all_securities(types="stock")
+    df_local = QA_fetch_stock_basic(status=None)
     intersection = df_local.index.intersection(stock_list)
-    ss = df_local.loc[intersection]["start_date"]
-    ss.index = ss.index.map(lambda x: x[:6])
+    ss = df_local.loc[intersection]["list_date"]
+
+    # df_local = jqdatasdk.get_all_securities(types="stock")
+    # intersection = df_local.index.intersection(stock_list)
+    # ss = df_local.loc[intersection]["start_date"]
+    # ss.index = ss.index.map(lambda x: x[:6])
     # 拼接上市时间
     merged_data = merged_data.loc[(slice(None), list(ss.index)), :]
     merged_data["start_date"] = merged_data.index.map(lambda x: ss.loc[x[1]]

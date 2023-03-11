@@ -45,6 +45,7 @@ else:
                                     "code"]
                                 )
     factor = factor_data['factor']
+    print(factor)
 
     # 极值处理，默认使用 "MAD"
     factor = preprocess.QA_winsorize_factor(factor)

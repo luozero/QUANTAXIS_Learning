@@ -1,4 +1,4 @@
-import jqdatasdk
+# import jqdatasdk
 import pandas as pd
 import QUANTAXIS as QA
 
@@ -8,7 +8,6 @@ import QUANTAXIS.QAFactor.preprocess as preprocess
 import QUANTAXIS.QAFactor.tears as tears
 import QUANTAXIS.QAFactor.utils as utils
 
-jqdatasdk.auth("聚宽用户名", "聚宽密码")
 
 # 因子股票池
 code_list = QA.QA_fetch_stock_block_adv().get_block(
@@ -75,8 +74,9 @@ factor_time_range = factor.index.remove_unused_levels().get_level_values(
 
 # # 方式二：直接输入行业数据
 industry_data = pd.Series(index=factor.index, data='白酒')
-dataapi = DataApi(jq_username="聚宽用户名",
-                  jq_password="聚宽密码",
+dataapi = DataApi(
+                # jq_username="聚宽用户名",
+                #   jq_password="聚宽密码",
                   factor_time_range=factor_time_range,
                   industry_cls=None,
                   industry_data=industry_data,
