@@ -91,7 +91,7 @@ def plot_returns_table(alpha_beta, mean_ret_quantile, mean_ret_spread_quantile):
     打印因子收益表, 需要输入因子的 alpha, beta, 分位收益情况
     """
     returns_table = pd.DataFrame()
-    returns_table = returns_table.append(alpha_beta)
+    returns_table = pd.concat([returns_table, alpha_beta])
     returns_table.loc["Mean Period Wise Return Top Quantile (bps)"] = (
         mean_ret_quantile.iloc[-1] * DECIMAL_TO_BPS
     )
@@ -217,12 +217,12 @@ def plot_information_table(ic_data):
 def plot_turnover_table(autocorrelation_data, quantile_turnover):
     turnover_table = pd.DataFrame()
     for period in sorted(quantile_turnover.keys()):
-        for quantile, p_data in quantile_turnover[period].iteritems():
+        for quantile, p_data in quantile_turnover[period].items():
             turnover_table.loc[f"Quantile {quantile} Mean Turnover",
                                f"{period}"] = p_data.mean()
 
     auto_corr = pd.DataFrame()
-    for period, p_data in autocorrelation_data.iteritems():
+    for period, p_data in autocorrelation_data.items():
         auto_corr.loc["Mean Factor Rank Autocorrelation",
                       f"{period}"] = p_data.mean()
 

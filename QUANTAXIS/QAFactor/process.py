@@ -275,7 +275,7 @@ def get_clean_factor(
         # 按日期，分位进行权重归一，然后将分位索引删除
         merged_data["weights"] = (merged_data.set_index(
             "factor_quantile", append=True).groupby(
-                level=["datetime", "factor_quantile"])["weights"].apply(
+                level=["datetime", "factor_quantile"], group_keys=True)["weights"].apply(
                     lambda s: s.divide(s.sum())).reset_index("factor_quantile",
                                                              drop=True))
 
@@ -350,7 +350,7 @@ def quantize_data(
             raise ValueError("只有存在分组信息时才能进行分组进行分位处理")
         grouper.append("group")
 
-    factor_quantile = factor_data.groupby(grouper)["factor"].apply(
+    factor_quantile = factor_data.groupby(grouper, group_keys=False)["factor"].apply(
         quantile_calc, quantiles, bins, zero_aware, no_raise)
 
     return factor_quantile
@@ -378,7 +378,7 @@ def demean_forward_returns(factor_data: pd.DataFrame,
 
     cols = get_forward_returns_columns(factor_data.columns)
     factor_data[cols] = factor_data.groupby(
-        grouper, as_index=False)[cols.append(pd.Index(
+        grouper, as_index=False, group_keys=False)[cols.append(pd.Index(
             ["weights"]))].apply(lambda x: x[cols].subtract(np.average(
                 x[cols], axis=0, weights=x["weights"].fillna(0.0).values),
                                                             axis=1))
