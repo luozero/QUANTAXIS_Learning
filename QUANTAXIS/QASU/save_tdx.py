@@ -1185,8 +1185,8 @@ def QA_SU_save_index_min(client=DATABASE, ui_log=None, ui_progress=None):
             for type in ['1min', '5min', '15min', '30min', '60min']:
                 ref_ = coll.find({'code': str(code)[0:6], 'type': type})
                 end_time = str(now_time())[0:19]
-                if ref_.count() > 0:
-                    start_time = ref_[ref_.count() - 1]['datetime']
+                if len(list(ref_)) > 0:
+                    start_time = ref_[len(list(ref_)) - 1]['datetime']
 
                     QA_util_log_info(
                         '##JOB05.{} Now Saving {} from {} to {} =={} '.format(
@@ -7851,10 +7851,10 @@ if __name__ == '__main__':
     # QA_SU_save_stock_min()
     # QA_SU_save_stock_transaction()
     # QA_SU_save_index_day()
-    QA_SU_save_index_day()
+    # QA_SU_save_index_day()
     # QA_SU_save_stock_block()
     # QA_SU_save_stock_list()
-    # QA_SU_save_index_min()
+    QA_SU_save_index_min()
     # QA_SU_save_index_list()
     # QA_SU_save_future_list()
 
