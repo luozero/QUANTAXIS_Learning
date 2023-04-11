@@ -49,6 +49,7 @@ factor_data = factor_data.loc[(factor_data.datetime - factor_data.start_date
                                    ["datetime", "code"])
 factor = factor_data['factor']
 
+# factor = preprocess.QA_fmt_factor(factor)
 # 极值处理，默认使用 "MAD"
 # QA_winsorize_factor 默认使用 “MAD” 极值处理方式, 按日期分组进行极值处理
 factor = preprocess.QA_winsorize_factor(factor)

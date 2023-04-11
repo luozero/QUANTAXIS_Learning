@@ -26,6 +26,10 @@
 """
 
 
+def QA_util_code_change_format(code):
+    code = code.split('.')[1][0:6]
+    return code+'.XSHE' if code[0] != '6' else code+'.XSHG'
+
 def QA_util_code_tostr(code):
     """
     explanation:

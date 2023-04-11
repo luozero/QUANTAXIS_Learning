@@ -1,0 +1,5 @@
+Looking in indexes: http://pypi.douban.com/simple
+Collecting numpy
+  Downloading http://pypi.doubanio.com/packages/9c/ee/77768cade9607687fadbcc1dcbb82dba0554154b3aa641f9c17233ffabe8/numpy-1.24.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (17.3 MB)
+Installing collected packages: numpy
+Successfully installed numpy-1.24.2

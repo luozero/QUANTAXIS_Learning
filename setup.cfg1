@@ -1,0 +1,5 @@
+# re-run 'versioneer.py setup' after changing this section, and commit the
+# resulting files.
+
+[easy_install]
+index_url = http://pypi.douban.com/simple

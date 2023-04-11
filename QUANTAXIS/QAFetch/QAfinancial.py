@@ -98,7 +98,7 @@ def download_financialzip():
 
             print('FILE {} is already in {}'.format(item, download_path))
         else:
-            print('CURRENTLY GET/UPDATE {}'.format(item[0:12]))
+            print('CURRENTLY GET/UPDATE {}'.format(item[0:12]), 'http://down.tdx.com.cn:8001/tdxfin/{}'.format(item))
             r = requests.get('http://down.tdx.com.cn:8001/tdxfin/{}'.format(item))
             file = '{}{}{}'.format(download_path, os.sep, item)
 

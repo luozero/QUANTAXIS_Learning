@@ -25,7 +25,9 @@ code_list = QA.QA_fetch_stock_block_adv().get_block(
 df_finance = QA.QA_fetch_financial_report_adv(
     code=code_list,
     start='2016-01-01',
-    end='2018-12-31'
+    # end='2018-12-31'
+    # start='2018-01-01',
+    end='2022-12-31'
 ).data
 
 if len(df_finance) ==0:
