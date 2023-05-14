@@ -31,6 +31,7 @@ log_path = generate_path('log')
 download_path = generate_path('downloads')
 strategy_path = generate_path('strategy')
 bin_path = generate_path('bin')  #给一些dll文件存储用
+analysis_path = generate_path('analysis')
 
 
 make_dir(qa_path, exist_ok=True)
@@ -40,3 +41,4 @@ make_dir(download_path, exist_ok=True)
 make_dir(log_path, exist_ok=True)
 make_dir(strategy_path, exist_ok=True)
 make_dir(bin_path, exist_ok=True)
+make_dir(analysis_path, exist_ok=True)

@@ -1,0 +1,281 @@
+# import jqdatasdk
+from datetime import datetime
+import os
+
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+
+import QUANTAXIS as QA
+from QUANTAXIS.QASetting.QALocalize import analysis_path
+
+from QUANTAXIS.QAUtil.QADate import month_data
+import QUANTAXIS.QAFactor.analyze as analyze
+import QUANTAXIS.QAFactor.data as data
+import QUANTAXIS.QAFactor.preprocess as preprocess
+import QUANTAXIS.QAFactor.tears as tears
+import QUANTAXIS.QAFactor.utils as utils
+from QUANTAXIS.QAFetch import QAQuery_Advance as QAQueryAdv
+
+class QAAnalysis_finance:
+
+  def __init__(self, code_list, factors = ['ROE'], start = '2016-01-01', end = '2023-01-01') -> None:
+
+    self.code_list = code_list
+
+    self.code_list_process = []
+
+    self.factors = factors
+
+    series = pd.Series(
+        data=month_data,
+        index=pd.to_datetime(month_data, utc=False),
+        name='date'
+    )
+    self.dates = series.loc[start:end].tolist()
+
+    pass
+  
+  
+  def ab_ratio_calc(self, a,b,str):
+    data = a/b
+    # data[np.isinf(data)]=0
+    # data[np.isnan(data)]=0
+    data = data * 100
+    dict_data = {str:data}
+    pd_data = pd.DataFrame(dict_data)
+    return pd_data
+  def qoq_rate_calc(self, a,str):
+    data = a.pct_change(-3)
+    data = data * 100
+    data[np.isinf(data)]=0
+    # data = np.append(data,[0,0,0,0])
+    dict_data = {str:data}
+    pd_data = pd.DataFrame(dict_data)
+    return pd_data
+  def abc_ratio_calc(self, a,b,c,str,op):
+    if(op=='sub'):
+      data = a/(b-c)
+    data[np.isinf(data)]=0
+    dict_data = {str:data}
+    pd_data = pd.DataFrame(dict_data)
+    return pd_data
+
+
+  def finance_stock_financial_data(self, code = '600519'):
+    try:
+      df_finance = QA.QA_fetch_financial_report_adv(
+          code
+      ).data
+      df_finance = df_finance.sort_index(ascending=False)
+      return df_finance
+    except:
+      print(self.fetch_one_data.__name__, "input wrong!")
+
+  # def nearest_date(self, date_list, input_date):
+  #   return min(date_list, key=lambda x: abs(x - input_date))
+  
+  def nearest_date(self, date_list, input_date):
+    input_datetime = input_date
+    # Sort the date list in ascending order
+    date_list_sorted = sorted(date_list)
+    # Do a linear search to find the nearest date
+    nearest_date = None
+    for date in date_list_sorted:
+        dt = date
+        if dt > input_datetime:
+            if (dt - input_datetime) < (input_datetime - date_list_sorted[date_list_sorted.index(date) - 1]):
+                nearest_date = date
+            else:
+                nearest_date = date_list_sorted[date_list_sorted.index(date) - 1]
+            break
+    if nearest_date is None:
+        nearest_date = date_list_sorted[-1]
+
+    return nearest_date
+
+  def get_market_value(self, code, df_finance):
+    res = QAQueryAdv.QA_fetch_stock_day_adv(code).data.reset_index(level='code')
+    daily_trade_dates = res.index
+
+    trade_data_quarter = pd.DataFrame()
+    finance_dates = df_finance['report_date'].values
+    dates = []
+    for get_date in finance_dates:
+      # print(get_date)
+      date = self.nearest_date(daily_trade_dates, get_date)
+      dates.append(date)
+
+    # trade_data_quarter = pd.concat([trade_data_quarter, res.loc[date]], axis = 1)
+    trade_data_quarter = res.loc[dates]
+
+    close = trade_data_quarter['close']
+    close.index = df_finance['totalCapital'].index
+      
+    return df_finance['totalCapital'] * close
+
+  def finance_factors_one_stock(self, code):
+    df_finance = self.finance_stock_financial_data(code)
+
+    equlity = df_finance['totalOwnersEquity']
+    asset = df_finance['totalAssets']
+    revenue = df_finance['operatingRevenue']
+    cash = df_finance['netCashFlowsFromOperatingActivities']
+    debt = df_finance['totalLiabilities']
+
+    earning = df_finance['netProfit']
+    tax0 = df_finance['incomeTax']
+    cost = df_finance['operatingCosts']
+    EBIT = df_finance['EBIT']
+
+    equity = df_finance['totalOwnersEquity']
+    debt_total = df_finance['totalLiabilitiesAndOwnersEquity']
+    intangible_asset = df_finance['intangibleAssets']
+    dev_cost = df_finance['developmentExpenditure']
+    goodwell = df_finance['goodwill']
+    fix_asset = df_finance['fixedAssets']
+    noncurrent_asset = intangible_asset + goodwell + fix_asset
+
+    depreciation = df_finance['depreciationForFixedAssets']
+    amortize0 = df_finance['amortizationOfIntangibleAssets']
+    amortize1 = df_finance['amortizationOfLong-termDeferredExpenses']
+    excess_cash = df_finance['cashEndingBal']
+    cash_quivalent = df_finance['cashBeginingBal']
+
+    divedends = df_finance['cashPaymentsForDistrbutionOfDividendsOrProfits']
+    EBITDA = EBIT + depreciation +amortize0 + amortize1
+    market_cap = self.get_market_value(code, df_finance)
+    EV = market_cap + debt - excess_cash
+
+    ##### earning capacity
+    #roe
+    roe = pd.DataFrame(df_finance['ROE'])
+    roe = roe.rename(columns={'ROE': 'roe'})
+    # roe = roe.rename(columns = ['roe'])
+    pd_data = roe
+    #roa
+    roa = self.ab_ratio_calc(earning,asset,'roa')
+    pd_data = pd.concat([pd_data, roa], axis=1)
+    #roi
+    roi = self.ab_ratio_calc(EBIT-tax0,equity+debt_total-cash_quivalent,'roi')
+    pd_data = pd.concat([pd_data, roi], axis=1)
+    #profit_revenue
+    profit_revenue = self.ab_ratio_calc(earning,revenue,'profit_revenue')
+    pd_data = pd.concat([pd_data, profit_revenue], axis=1)
+    #profit_cost
+    profit_cost = self.ab_ratio_calc(earning,cost,'profit_cost')
+    pd_data = pd.concat([pd_data, profit_cost], axis=1)
+    #stackholder equity increase
+    equlity_incr_rate = self.qoq_rate_calc(equity,'equlity_incr_rate')
+    pd_data = pd.concat([pd_data, equlity_incr_rate], axis=1)
+
+    ###grow capacity
+    #revenue
+    revenue_incr_rate = self.qoq_rate_calc(revenue,'revenue_incr_rate')
+    pd_data = pd.concat([pd_data, revenue_incr_rate], axis=1)
+    #profit
+    profit_incr_rate = self.qoq_rate_calc(earning,'profit_incr_rate')
+    pd_data = pd.concat([pd_data, profit_incr_rate], axis=1)
+    #cash
+    cash_incr_rate = self.qoq_rate_calc(cash,'cash_incr_rate')
+    pd_data = pd.concat([pd_data, cash_incr_rate], axis=1)
+    #asset
+    asset_incr_rate = self.qoq_rate_calc(asset,'asset_incr_rate')
+    pd_data = pd.concat([pd_data, asset_incr_rate], axis=1)
+    #debt
+    debt_incr_rate = self.qoq_rate_calc(debt,'debt_incr_rate')
+    pd_data = pd.concat([pd_data, debt_incr_rate], axis=1)
+
+    ###asset struct
+    #debt_asset_ratio
+    debt_asset_ratio = self.ab_ratio_calc(debt,asset,'debt_asset_ratio')
+    debt_asset_ratio = debt_asset_ratio/100
+    pd_data = pd.concat([pd_data, debt_asset_ratio], axis=1)
+    #debt_equity_ratio
+    debt_equity_ratio = self.ab_ratio_calc(debt,equity,'debt_equity_ratio')
+    debt_equity_ratio = debt_equity_ratio/100
+    pd_data = pd.concat([pd_data, debt_equity_ratio], axis=1)
+    #debt_net_asset_ratio
+    debt_net_asset_ratio = self.abc_ratio_calc(debt,equity,intangible_asset,'debt_net_asset_ratio','sub')
+    pd_data = pd.concat([pd_data, debt_net_asset_ratio], axis=1)
+    #revenue_asset_ratio
+    revenue_asset_ratio = self.ab_ratio_calc(revenue,asset,'revenue_asset_ratio')
+    revenue_asset_ratio = revenue_asset_ratio
+    pd_data = pd.concat([pd_data, revenue_asset_ratio], axis=1)
+    #goodwell_equity_ratio
+    goodwell_equity_ratio = self.ab_ratio_calc(goodwell,equity,'goodwell_equity_ratio')
+    pd_data = pd.concat([pd_data, goodwell_equity_ratio], axis=1)
+
+    ###CFO2EV
+    CFO_EV_ratio = self.ab_ratio_calc(cash,EV,'CFO2EV')
+    pd_data = pd.concat([pd_data, CFO_EV_ratio], axis=1)
+    ####EBITDA2ev
+    EBITDA_EV_ratio = self.ab_ratio_calc(EBITDA,EV,'EDITDA2EV')
+    pd_data = pd.concat([pd_data, EBITDA_EV_ratio], axis=1)
+    ###BB2P
+    divedends_market_cap_ratio = self.ab_ratio_calc(divedends,market_cap,'BB2P')
+    pd_data = pd.concat([pd_data, divedends_market_cap_ratio], axis=1)
+    ###BB2EV
+    divedends_EV_ratio = self.ab_ratio_calc(divedends,EV,'BB2EV')
+    pd_data = pd.concat([pd_data, divedends_EV_ratio], axis=1)
+    #B2P
+    B2P_ratio = self.ab_ratio_calc(equlity,market_cap,'B2P')/100
+    pd_data = pd.concat([pd_data, B2P_ratio], axis=1)
+    #S2EV
+    S2EV_ratio = self.ab_ratio_calc(revenue,EV,'S2EV')
+    pd_data = pd.concat([pd_data, S2EV_ratio], axis=1)
+    #equity_asset_ratio
+    OL = self.ab_ratio_calc(equity,asset,'OL')
+    pd_data = pd.concat([pd_data, OL], axis=1)
+    #NCO2A
+    NCO2A = self.ab_ratio_calc(noncurrent_asset,asset,'NCO2A')
+    pd_data = pd.concat([pd_data, NCO2A], axis=1)
+    #E2EV
+    E2EV = self.ab_ratio_calc(earning,EV,'E2EV')
+    pd_data = pd.concat([pd_data, E2EV], axis=1)
+    
+    return pd_data
+
+  def finance_factors_all_stock(self):
+
+    finance_factors = pd.DataFrame()
+    for code in self.code_list:
+      pd_data = self.finance_factors_one_stock(code)
+      [row, col] = pd_data.shape
+
+      print("calc code ", code)
+      if (row > len(self.dates)):
+        finance_factors = pd.concat([finance_factors, pd_data.loc[self.dates, self.factors]])
+        self.code_list_process.append(code)
+        print("add process code ", code)
+    return finance_factors
+
+  def finance_factors_rank(self, finance_factors):
+
+    scaler = MinMaxScaler()
+
+    factor_scaled_sum = pd.DataFrame(0, columns=['scale_sum'], index=self.code_list_process)
+    for date in self.dates:
+      factor = finance_factors.loc[(date, slice(None)), :]
+      factor_scaled = pd.DataFrame(scaler.fit_transform(factor), columns=self.factors, index=self.code_list_process)
+      factor_scaled_sum = factor_scaled_sum + pd.DataFrame(factor_scaled.loc[:,self.factors].sum(axis=1), index=self.code_list_process, columns=['scale_sum'])
+
+    factor_scaled_rank = factor_scaled_sum.sort_values(by = ['scale_sum'], ascending=False)
+    return factor_scaled_rank
+
+
+if __name__ == '__main__':
+  # code_list = ['600519', '000001', '000338', '600660', '000063']
+  # code_list =  QA.QA_fetch_stock_block_adv().get_block("白酒").code
+  code_list =  QA.QA_fetch_stock_block_adv().code
+  print("code list len ", len(code_list))
+  factors = ['roe', 'roa', 'profit_revenue', 'revenue_incr_rate', 'cash_incr_rate']
+  start = '2016-01-01'
+  end = '2023-03-31'
+  qaanalysis_finance = QAAnalysis_finance(code_list, factors,  start, end)
+  finance_factors = qaanalysis_finance.finance_factors_all_stock()
+  finance_rank = qaanalysis_finance.finance_factors_rank(finance_factors)
+  csv_file = os.path.join(analysis_path, start + '_' + end + '_finance.csv')
+  finance_rank.to_csv(csv_file)
+
+  print('finance_rank write to ', csv_file)
