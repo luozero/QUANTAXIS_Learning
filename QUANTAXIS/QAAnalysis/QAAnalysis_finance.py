@@ -240,17 +240,27 @@ class QAAnalysis_finance:
 
     finance_factors = pd.DataFrame()
     for code in self.code_list:
-      pd_data = self.finance_factors_one_stock(code)
-      [row, col] = pd_data.shape
-
       print("calc code ", code)
-      if (row > len(self.dates)):
+      try:
+        pd_data = self.finance_factors_one_stock(code)
+        [row, col] = pd_data.shape
+      except:
+        print("no finance data skip stock", code)
+        continue
+      
+      try:
+        print("add process code ", code)
         finance_factors = pd.concat([finance_factors, pd_data.loc[self.dates, self.factors]])
         self.code_list_process.append(code)
-        print("add process code ", code)
+      except:
+        print('no enough finance data skip stock ', code)
+
     return finance_factors
 
   def finance_factors_rank(self, finance_factors):
+
+    if (finance_factors.empty):
+      return None
 
     scaler = MinMaxScaler()
 
@@ -268,6 +278,7 @@ if __name__ == '__main__':
   # code_list = ['600519', '000001', '000338', '600660', '000063']
   # code_list =  QA.QA_fetch_stock_block_adv().get_block("白酒").code
   code_list =  QA.QA_fetch_stock_block_adv().code
+  # code_list = ['000780']
   print("code list len ", len(code_list))
   factors = ['roe', 'roa', 'profit_revenue', 'revenue_incr_rate', 'cash_incr_rate']
   start = '2016-01-01'
@@ -275,7 +286,11 @@ if __name__ == '__main__':
   qaanalysis_finance = QAAnalysis_finance(code_list, factors,  start, end)
   finance_factors = qaanalysis_finance.finance_factors_all_stock()
   finance_rank = qaanalysis_finance.finance_factors_rank(finance_factors)
-  csv_file = os.path.join(analysis_path, start + '_' + end + '_finance.csv')
-  finance_rank.to_csv(csv_file)
+  
+  if finance_rank != None:
+    csv_file = os.path.join(analysis_path, start + '_' + end + '_finance.csv')
+    print('finance_rank write to ', csv_file)
+    finance_rank.to_csv(csv_file)
+  else:
+    print("finance factors are None")
 
-  print('finance_rank write to ', csv_file)
