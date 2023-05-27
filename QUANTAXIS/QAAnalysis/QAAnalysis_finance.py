@@ -260,6 +260,8 @@ class QAAnalysis_finance:
         print('no enough finance data skip stock ', code)
 
     finance_factors.replace([np.inf, -np.inf], 0, inplace=True)
+
+    finance_factors.index = finance_factors.index.map(lambda x: (x[0],'{:0>6s}'.format("'" + str(x[1]))))
     # finance_factors = finance_factors[~finance_factors.isin([np.nan, np.inf, -np.inf]).any(axis=1)]
 
     return finance_factors
@@ -278,25 +280,25 @@ class QAAnalysis_finance:
       factor_scaled_sum = factor_scaled_sum + pd.DataFrame(factor_scaled.loc[:,self.factors].sum(axis=1), index=self.code_list_process, columns=['scale_sum'])
 
     factor_scaled_rank = factor_scaled_sum.sort_values(by = ['scale_sum'], ascending=False)
-    factor_scaled_rank.index = factor_scaled_rank.index.map(lambda x: '{:0>6s}'.format(str(x)))
+    factor_scaled_rank.index = factor_scaled_rank.index.map(lambda x: '{:0>6s}'.format("'" + str(x)))
     # factor_scaled_rank.index = [f'{idx:06d}' for idx in factor_scaled_rank.index]
     # factor_scaled_rank.index = [f'{idx:06d}' for idx in factor_scaled_rank.index]
     return factor_scaled_rank
 
 
 if __name__ == '__main__':
-  code_list = ['600519', '000001', '000338', '600660', '000063']
+  # code_list = ['600519', '000001', '000338', '600660', '000063']
   # code_list =  QA.QA_fetch_stock_block_adv().get_block("沪深300").code
   # code_list =  QA.QA_fetch_stock_block_adv().get_block("上证50").code
-  # code_list =  QA.QA_fetch_stock_block_adv().code
+  code_list =  QA.QA_fetch_stock_block_adv().code
   # code_list = ['000408']
   print("code list len ", len(code_list))
   factors = ['roe', 'roa', 'profit_revenue', 'revenue_incr_rate', 'cash_incr_rate']
-  start = '2016-01-01'
+  start = '2020-12-31'
   end = '2023-03-31'
   qaanalysis_finance = QAAnalysis_finance(code_list, factors,  start, end)
   finance_factors = qaanalysis_finance.finance_factors_all_stock()
-  csv_file = os.path.join(analysis_path, 'temp_finance_factors.csv')
+  csv_file = os.path.join(analysis_path, start + '_' + end + 'temp_finance_factors.csv')
   finance_factors.to_csv(csv_file)
   finance_rank = qaanalysis_finance.finance_factors_rank(finance_factors)
   

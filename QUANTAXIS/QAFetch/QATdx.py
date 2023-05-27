@@ -1319,6 +1319,7 @@ def QA_fetch_get_stock_block(ip=None, port=None):
             api.to_df(api.get_and_parse_block_info("block_fg.dat")).assign(type="fg"),
             api.to_df(api.get_and_parse_block_info("block_gn.dat")).assign(type="gn"),
             api.to_df(api.get_and_parse_block_info("block_zs.dat")).assign(type="zs"),
+            # api.to_df(api.get_and_parse_block_info("tdxhy.cfg")).assign(type="tdxhy"),
             # api.to_df(api.get_and_parse_block_info("hkblock.dat" )).assign(type="hk"),
             # api.to_df(api.get_and_parse_block_info("jjblock.dat" )).assign(type="jj"),
             # api.to_df(api.get_and_parse_block_info("mgblock.dat" )).assign(type="mg"),
@@ -1339,8 +1340,15 @@ def QA_fetch_get_stock_block(ip=None, port=None):
             drop(['block_type', 'code_index'], axis=1).\
             set_index('code', drop=False, inplace=False).\
             drop_duplicates()
-        if len(df) > 1:
-            data = data.append( df[['code', 'blockname', 'type']].assign(source='tdx') )
+        # if len(df) > 1:
+        #     data = data.append( df[['code', 'blockname', 'type']].assign(source='tdx') )
+        if len(df):
+            df.set_index('code', drop=False, inplace=True)
+            data = pd.concat([data,
+                       pd.concat([df[['code', 'tdxnhy']].rename({'tdxnhy': 'blockname'}, axis=1).assign(type='tdxhy').assign(source='tdx'), 
+                                  df[['code', 'tdxrshy']].rename({'tdxrshy': 'blockname'}, axis=1).assign(type='tdxrshy').assign(source='tdx')])]
+                      )
+
         return data
     else:
         QA_util_log_info('Wrong with fetch block ')
@@ -1410,6 +1418,52 @@ def _read_industry(folder: str) -> pd.DataFrame:
         melt(id_vars=('sse', 'code'), value_name='hycode')
     return df
 
+def read_industry(folder:str) -> pd.DataFrame:
+    incon = folder + '/incon.dat' # tdx industry file
+    hy = folder + '/tdxhy.cfg' # tdx stock file
+
+    # tdx industry file
+    with open(incon, encoding='GB18030', mode='r') as f:
+        incon = f.read()
+    incon = incon.splitlines()
+    incon_dict = {}
+    for i in incon:
+        if len(i) <= 0: continue
+        if i[0] == '#' and i[1] != '#':
+            j = i.replace('\n', '').replace('#', '')
+            incon_dict[j] = []
+        else:
+            if i[1] != '#':
+                incon_dict[j].append(i.replace('\n', '').split(' ')[0].split('|'))
+
+    incon = pd.concat([pd.DataFrame.from_dict(v).assign(type=k) for k,v in incon_dict.items()]) \
+        .rename({0: 'code', 1: 'name'}, axis=1).reset_index(drop=True)
+
+    with open(hy, encoding='GB18030', mode='r') as f:
+        hy = f.readlines()
+    hy = [line.replace('\n', '') for line in hy]
+    hy = pd.DataFrame(line.split('|') for line in hy)
+    # filter codes
+    hy = hy[~hy[1].str.startswith('9')]
+    hy = hy[~hy[1].str.startswith('2')]
+
+    hy1 = hy[[1, 2]].set_index(2).join(incon.set_index('code')).set_index(1)[['name', 'type']]
+    hy2 = hy[[1, 5]].set_index(5).join(incon.set_index('code')).set_index(1)[['name', 'type']]
+    # join tdxhy and swhy
+    df = hy.set_index(1) \
+        .join(hy1.rename({'name': hy1.dropna()['type'].values[0], 'type': hy1.dropna()['type'].values[0]+'_type'}, axis=1)) \
+        .join(hy2.rename({'name': hy2.dropna()['type'].values[0], 'type': hy2.dropna()['type'].values[0]+'_type'}, axis=1)).reset_index()
+    df = df.dropna()
+
+    df.rename({0: 'sse', 1: 'code', 2: 'TDX_code', 5: 'SW_code'}, axis=1, inplace=True)
+    df = df[[i for i in df.columns if not isinstance(i, int) and  '_type' not in str(i)]]
+    df.columns = [i.lower() for i in df.columns]
+
+    # shutil.rmtree(folder, ignore_errors=True)
+    return df
+
+
+
 
 def QA_fetch_get_tdx_industry(data_dir=None, incon_block_info=None):
     # type: (str, pd.DataFrame) -> pd.DataFrame
@@ -1418,7 +1472,7 @@ def QA_fetch_get_tdx_industry(data_dir=None, incon_block_info=None):
     import shutil
     try:
         folder = data_dir
-        # folder = 'D:\\softs\\zd_zszq\\T0002\\hq_cache'  # todo: for test only, removable
+        # folder = '/tmp/tdx_127818'  # todo: for test only, removable
         if not folder:
             folder = _download_tdx_file(False if isinstance(incon_block_info, pd.DataFrame) else True)
         if not isinstance(incon_block_info, pd.DataFrame):
@@ -1432,7 +1486,8 @@ def QA_fetch_get_tdx_industry(data_dir=None, incon_block_info=None):
 
             incon_block_info = _parse_block_name_info(incon_content)
 
-        df = _read_industry(folder).merge(incon_block_info, on='hycode')
+        # df = _read_industry(folder).merge(incon_block_info, on='hycode')
+        df = read_industry(folder)
         df.set_index('code', drop=False, inplace=True)
     except Exception as e:
         print(e)
@@ -2772,5 +2827,6 @@ if __name__ == '__main__':
     # print(QA_fetch_get_stock_transaction('000001', '2017-07-03', '2017-07-10'))
 
     # print(QA_fetch_get_stock_info('600116'))
-    rows = QA_fetch_get_hkstock_list()
-    print(rows)
+    #df = QA_fetch_get_hkstock_list()
+    df = QA_fetch_get_stock_block()
+    print(df)
