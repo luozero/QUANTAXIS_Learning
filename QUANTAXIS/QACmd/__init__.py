@@ -495,6 +495,7 @@ class CLI(cmd.Cmd):
                         {"username": "admin", "password": "admin"}
                     )
                 # QA_ts_update_inc()
+                # QA_SU_save_stock_block("tdx")
                 QA_ts_update_stock_basic()
                 QA_ts_update_industry()
 
