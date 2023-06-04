@@ -360,6 +360,8 @@ class CLI(cmd.Cmd):
 
     def do_save(self, arg):
         # 仅仅是为了初始化才在这里插入用户,如果想要注册用户,要到webkit底下注册
+        count =  QA_Setting().client.quantaxis.user_list.count_documents({"username": "admin"})
+        print('count: ', count)
         if arg == "":
             self.print_save_usage()
         else:
@@ -367,10 +369,7 @@ class CLI(cmd.Cmd):
 
             if len(arg) == 1 and arg[0] == "all":
                 if (
-                    QA_Setting()
-                    .client.quantaxis.user_list.find({"username": "admin"})
-                    .count()
-                    == 0
+                    count == 0
                 ):
                     QA_Setting().client.quantaxis.user_list.insert(
                         {"username": "admin", "password": "admin"}
@@ -394,10 +393,7 @@ class CLI(cmd.Cmd):
 
             elif len(arg) == 1 and arg[0] == "day":
                 if (
-                    QA_Setting()
-                    .client.quantaxis.user_list.find({"username": "admin"})
-                    .count()
-                    == 0
+                    count == 0
                 ):
                     QA_Setting().client.quantaxis.user_list.insert(
                         {"username": "admin", "password": "admin"}
@@ -418,10 +414,7 @@ class CLI(cmd.Cmd):
 
             elif len(arg) == 1 and arg[0] == "min":
                 if (
-                    QA_Setting()
-                    .client.quantaxis.user_list.find({"username": "admin"})
-                    .count()
-                    == 0
+                    count == 0
                 ):
                     QA_Setting().client.quantaxis.user_list.insert(
                         {"username": "admin", "password": "admin"}
@@ -439,10 +432,7 @@ class CLI(cmd.Cmd):
                 # QA_SU_save_stock_block('tdx')
             elif len(arg) == 1 and arg[0] == "transaction":
                 if (
-                    QA_Setting()
-                    .client.quantaxis.user_list.find({"username": "admin"})
-                    .count()
-                    == 0
+                    count == 0
                 ):
                     QA_Setting().client.quantaxis.user_list.insert(
                         {"username": "admin", "password": "admin"}
@@ -463,10 +453,7 @@ class CLI(cmd.Cmd):
 
             elif len(arg) == 1 and arg[0] in ["X", "x"]:
                 if (
-                    QA_Setting()
-                    .client.quantaxis.user_list.find({"username": "admin"})
-                    .count()
-                    == 0
+                    count == 0
                 ):
                     QA_Setting().client.quantaxis.user_list.insert(
                         {"username": "admin", "password": "admin"}
@@ -486,10 +473,7 @@ class CLI(cmd.Cmd):
                 # QA_SU_save_stock_info('tdx')
             elif len(arg) == 1 and arg[0] == "ts_all":
                 if (
-                    QA_Setting()
-                    .client.quantaxis.user_list.find({"username": "admin"})
-                    .count()
-                    == 0
+                    count == 0
                 ):
                     QA_Setting().client.quantaxis.user_list.insert(
                         {"username": "admin", "password": "admin"}
@@ -504,10 +488,7 @@ class CLI(cmd.Cmd):
                 # QA_ts_update_daily_basic()
             elif len(arg) == 1 and arg[0] == "ts_financial":
                 if (
-                    QA_Setting()
-                    .client.quantaxis.user_list.find({"username": "admin"})
-                    .count()
-                    == 0
+                    count == 0
                 ):
                     QA_Setting().client.quantaxis.user_list.insert(
                         {"username": "admin", "password": "admin"}
@@ -515,10 +496,7 @@ class CLI(cmd.Cmd):
                 QA_ts_update_inc()
             elif len(arg) == 1 and arg[0] == "ts_daily":
                 if (
-                    QA_Setting()
-                    .client.quantaxis.user_list.find({"username": "admin"})
-                    .count()
-                    == 0
+                    count == 0
                 ):
                     QA_Setting().client.quantaxis.user_list.insert(
                         {"username": "admin", "password": "admin"}
@@ -665,10 +643,7 @@ class CLI(cmd.Cmd):
                 for i in arg:
                     if i == "insert_user":
                         if (
-                            QA_Setting()
-                            .client.quantaxis.user_list.find({"username": "admin"})
-                            .count()
-                            == 0
+                            count == 0
                         ):
                             QA_Setting().client.quantaxis.user_list.insert(
                                 {"username": "admin", "password": "admin"}

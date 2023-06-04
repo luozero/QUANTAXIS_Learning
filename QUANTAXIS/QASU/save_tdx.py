@@ -219,10 +219,12 @@ def QA_SU_save_stock_day(client=DATABASE, ui_log=None, ui_progress=None):
 
             # 当前数据库已经包含了这个代码的数据， 继续增量更新
             # 加入这个判断的原因是因为如果股票是刚上市的 数据库会没有数据 所以会有负索引问题出现
-            if ref.count() > 0:
+            count = coll_stock_day.count_documents({"code": str(code)[0:6]})
+            #if ref.count() > 0:
+            if count > 0:
 
                 # 接着上次获取的日期继续更新
-                start_date = ref[ref.count() - 1]['date']
+                start_date = ref[count - 1]['date']
 
                 QA_util_log_info(
                     'UPDATE_STOCK_DAY \n Trying updating {} from {} to {}'
