@@ -664,7 +664,7 @@ class QA_Fetch_Huobi(object):
 
     def add_subscription(
         self,
-        candleline=pd.Series(),
+        candleline=pd.Series(dtype=np.float64),
         start_epoch=datetime.now()
     ):
         """
