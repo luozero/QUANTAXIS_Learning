@@ -1065,9 +1065,10 @@ def QA_SU_save_index_day(client=DATABASE, ui_log=None, ui_progress=None):
 
         try:
             ref_ = coll.find({'code': str(code)[0:6]})
+            count = ref_.count_documents({"code": str(code)[0:6]})
             end_time = str(now_time())[0:10]
-            if ref_.count() > 0:
-                start_time = ref_[ref_.count() - 1]['date']
+            if count > 0:
+                start_time = ref_[count - 1]['date']
 
                 QA_util_log_info(
                     '##JOB04 Now Saving INDEX_DAY==== \n Trying updating {} from {} to {}'
