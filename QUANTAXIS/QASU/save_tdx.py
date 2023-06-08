@@ -1065,7 +1065,7 @@ def QA_SU_save_index_day(client=DATABASE, ui_log=None, ui_progress=None):
 
         try:
             ref_ = coll.find({'code': str(code)[0:6]})
-            count = ref_.count_documents({"code": str(code)[0:6]})
+            count = coll.count_documents({"code": str(code)[0:6]})
             end_time = str(now_time())[0:10]
             if count > 0:
                 start_time = ref_[count - 1]['date']
@@ -7855,13 +7855,13 @@ if __name__ == '__main__':
     # QA_SU_save_stock_transaction()
     # QA_SU_save_index_day()
     # QA_SU_save_index_day()
-    QA_SU_save_stock_block()
+    # QA_SU_save_stock_block()
     # QA_SU_save_stock_list()
     # QA_SU_save_index_min()
     # QA_SU_save_index_list()
     # QA_SU_save_future_list()
 
-    #QA_SU_save_future_day()
+    QA_SU_save_future_day()
 
     #QA_SU_save_future_min()
     # QA_SU_save_hkstock_list()

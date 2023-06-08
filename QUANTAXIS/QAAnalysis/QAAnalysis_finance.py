@@ -240,7 +240,7 @@ class QAAnalysis_finance:
 
     finance_factors = pd.DataFrame()
     for code in self.code_list:
-      print("calc code ", code)
+      # print("calc code ", code)
       try:
         pd_data = self.finance_factors_one_stock(code)
         [row, col] = pd_data.shape
@@ -253,7 +253,7 @@ class QAAnalysis_finance:
         [row, col] = pd_data_stock.shape
         
         if row == len(self.dates):
-          print("add process code ", code)
+          # print("add process code ", code)
           finance_factors = pd.concat([finance_factors, pd_data.loc[self.dates, self.factors]])
           self.code_list_process.append(str(code).zfill(6))
       except:
