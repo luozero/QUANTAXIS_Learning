@@ -1,3 +1,5 @@
+# coding:utf-8
+
 # import jqdatasdk
 from datetime import datetime
 import os
@@ -10,10 +12,10 @@ import QUANTAXIS as QA
 from QUANTAXIS.QASetting.QALocalize import analysis_path
 
 from QUANTAXIS.QAUtil.QADate import month_data
-import QUANTAXIS.QAFactor.analyze as analyze
-import QUANTAXIS.QAFactor.data as data
-import QUANTAXIS.QAFactor.preprocess as preprocess
-import QUANTAXIS.QAFactor.tears as tears
+# import QUANTAXIS.QAFactor.analyze as analyze
+# import QUANTAXIS.QAFactor.data as data
+# import QUANTAXIS.QAFactor.preprocess as preprocess
+# import QUANTAXIS.QAFactor.tears as tears
 import QUANTAXIS.QAFactor.utils as utils
 from QUANTAXIS.QAFetch import QAQuery_Advance as QAQueryAdv
 
