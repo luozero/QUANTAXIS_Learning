@@ -959,9 +959,9 @@ if __name__ == "__main__":
     # print(QA_fetch_last_financial(
     #         code = '000001', cursor_date = '2020-10-08'
     # ))
-    code = QA_fetch_stock_list().index.tolist()
-    cursor_date = '2020-10-08'
-    df_origin = QA_fetch_last_financial(code = code, cursor_date = cursor_date, sheet_type = "balancesheet")
+    # code = QA_fetch_stock_list().index.tolist()
+    # cursor_date = '2020-10-08'
+    # df_origin = QA_fetch_last_financial(code = code, cursor_date = cursor_date, sheet_type = "balancesheet")
     # print(QA_fetch_last_financial(
     #     cursor_date="2018-08-31"))
     # print(QA_fetch_last_financial(
@@ -972,7 +972,7 @@ if __name__ == "__main__":
     # print(QA_fetch_stock_basic("000001"))
     # print(QA_fetch_stock_basic(status=["P", "D"]))
     # 行业获取测试
-    # print(QA_fetch_industry_adv(start="1998-01-01", end="2020-12-02").head())
+    print(QA_fetch_industry_adv(start="1998-01-01", end="2020-12-02").head())
     # print(QA_fetch_industry_adv(["000001", "600000"],
     #                             start="1998-01-01", end="2020-12-02"))
     # print(QA_fetch_industry_adv(

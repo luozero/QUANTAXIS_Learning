@@ -701,6 +701,46 @@ def QA_fetch_stock_block_adv(
         return QA_DataStruct_Stock_block(data_set_index)
 
 
+def QA_fetch_sw_industry_adv(
+    sw=None,
+    industry_name=None,
+    collections=DATABASE.industry
+):
+    '''
+    返回板块 ❌
+    :param sw:
+    :param industry_name: 为list时模糊查询多版块交集
+    :param collections: 默认数据库 stock_block
+    :return: QA_DataStruct_Stock_block
+    '''
+
+    if sw is not None and industry_name is None:
+      # 返回这个股票代码所属的板块
+      sw_ = sw.split('_')
+      qry = {"level":{"$in":[sw_[1]]}}
+    elif industry_name is not None and sw is not None:
+      sw_ = sw.split('_')
+      if isinstance(industry_name, list):
+        qry = {{"level":{"$in":[sw_[1]]}}, {"industry_name":{"$in":industry_name}}}
+      else:
+        qry = {{"level":{"$in":[sw_[1]]}}, {"industry_name":{"$in":[industry_name]}}}
+    else:
+      qry = None
+        
+    data = pd.DataFrame(collections.find(qry))
+        
+    if len(data) > 0:
+
+      data = data.drop(['_id'], axis=1)
+      data = data.set_index(['industry_name',
+                          'code'],
+                        drop=True).drop_duplicates()
+      data = data.rename_axis(index={'industry_name': 'blockname'})
+      return QA_DataStruct_Stock_block(data)
+    else:
+      print("indurstry: ", industry_name, "sw: ", sw, 'is empty or wrong input!')
+
+
 def QA_fetch_stock_realtime_adv(
     code=None,
     num=1,
@@ -1032,24 +1072,27 @@ def QA_fetch_cryptocurrency_list_adv(
 if __name__ == '__main__':
     #st = QA_fetch_stock_block_adv(None, ["北京", "计算机"])
     #QA_fetch_stock_realtime_adv(['000001', '000002'], num=10)
-    from QUANTAXIS.QAFetch.QAhuobi import FIRST_PRIORITY
-    import QUANTAXIS as QA
-    codelist = ['BINANCE.BCHUSDT', 'BINANCE.BSVUSDT', 'BINANCE.BTCUSDT', 'BINANCE.EOSUSDT', 'BINANCE.ETHUSDT', 'BINANCE.ETCUSDT', 'BINANCE.DASHUSDT', 'BINANCE.LTCUSDT', 'BINANCE.XMRUSDT', 'BINANCE.XRPUSDT', 'BINANCE.ZECUSDT']
-    data1 = QA_fetch_cryptocurrency_day_adv(
-            code=codelist+['HUOBI.{}'.format(code) for code in FIRST_PRIORITY],
-            start='2019-08-21',
-            end='2020-05-28 18:10:00',
-        )
-    print(data1.data)
-    data2 = QA_fetch_cryptocurrency_min_adv(
-            code=[
-                'OKEX.BTC-USDT',
-                'OKEX.ETH-USDT',
-            ],
-            start='2017-10-01',
-            end='2020-05-28 18:10:00',
-            frequence='60min'
-        )
-    print(data2.data)
-    data_4h = QA.QA_DataStruct_CryptoCurrency_min(data2.resample('4h'))
-    print(data_4h.data)
+    # from QUANTAXIS.QAFetch.QAhuobi import FIRST_PRIORITY
+    # import QUANTAXIS as QA
+    # codelist = ['BINANCE.BCHUSDT', 'BINANCE.BSVUSDT', 'BINANCE.BTCUSDT', 'BINANCE.EOSUSDT', 'BINANCE.ETHUSDT', 'BINANCE.ETCUSDT', 'BINANCE.DASHUSDT', 'BINANCE.LTCUSDT', 'BINANCE.XMRUSDT', 'BINANCE.XRPUSDT', 'BINANCE.ZECUSDT']
+    # data1 = QA_fetch_cryptocurrency_day_adv(
+    #         code=codelist+['HUOBI.{}'.format(code) for code in FIRST_PRIORITY],
+    #         start='2019-08-21',
+    #         end='2020-05-28 18:10:00',
+    #     )
+    # print(data1.data)
+    # data2 = QA_fetch_cryptocurrency_min_adv(
+    #         code=[
+    #             'OKEX.BTC-USDT',
+    #             'OKEX.ETH-USDT',
+    #         ],
+    #         start='2017-10-01',
+    #         end='2020-05-28 18:10:00',
+    #         frequence='60min'
+    #     )
+    # print(data2.data)
+    # data_4h = QA.QA_DataStruct_CryptoCurrency_min(data2.resample('4h'))
+    # print(data_4h.data)
+    
+    
+    QA_fetch_sw_industry_adv('sw_l1')

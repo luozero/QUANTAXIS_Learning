@@ -522,6 +522,7 @@ def QA_ts_update_industry(
             item["out_date_stamp"] = QA_util_date_stamp(item["out_date_stamp"])
         coll.update_one(
             {
+                "industry_name": item["industry_name"],
                 "code": item["code"],
                 "level": item["level"],
                 "src": item["src"],

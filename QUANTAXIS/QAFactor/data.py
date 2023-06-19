@@ -300,8 +300,8 @@ class DataApi:
                     levels=industry_cls.split('_')[1],
                     src=industry_cls.split("_")[0])[["code", "industry_name"]]
             df_tmp["date"] = cursor_date
-            df_local = df_local.append(df_tmp)
-            # df_local = pd.concat(df_local, df_tmp)
+            # df_local = df_local.append(df_tmp)
+            df_local = pd.concat([df_local, df_tmp])
         # industries = map(
         #     partial(jqdatasdk.get_industry,
         #             stock_list),
