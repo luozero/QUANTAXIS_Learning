@@ -721,9 +721,9 @@ def QA_fetch_sw_industry_adv(
     elif industry_name is not None and sw is not None:
       sw_ = sw.split('_')
       if isinstance(industry_name, list):
-        qry = {{"level":{"$in":[sw_[1]]}}, {"industry_name":{"$in":industry_name}}}
+        qry = {"level":{"$in":[sw_[1]]}, "industry_name":{"$in":industry_name}}
       else:
-        qry = {{"level":{"$in":[sw_[1]]}}, {"industry_name":{"$in":[industry_name]}}}
+        qry = {"level":{"$in":[sw_[1]]}, "industry_name":{"$in":[industry_name]}}
     else:
       qry = None
         
@@ -1095,4 +1095,5 @@ if __name__ == '__main__':
     # print(data_4h.data)
     
     
-    QA_fetch_sw_industry_adv('sw_l1')
+    # QA_fetch_stock_block_adv('tdxhy')
+    QA_fetch_sw_industry_adv('sw_l2', '水泥')

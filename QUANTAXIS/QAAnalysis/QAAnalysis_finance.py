@@ -276,20 +276,23 @@ class QAAnalysis_finance:
     scaler = MinMaxScaler()
 
     factor_scaled_sum = pd.DataFrame(0, columns=['scale_sum'], index=self.code_list_process)
+    factor_scaled_sum.index = factor_scaled_sum.index.map(lambda x: "'" + x)
     for date in self.dates:
       factor = finance_factors.loc[(date, slice(None)), :]
-      factor_scaled = pd.DataFrame(scaler.fit_transform(factor), columns=self.factors, index=self.code_list_process)
-      factor_scaled_sum = factor_scaled_sum + pd.DataFrame(factor_scaled.loc[:,self.factors].sum(axis=1), index=self.code_list_process, columns=['scale_sum'])
+      # factor_scaled = pd.DataFrame(scaler.fit_transform(factor), columns=self.factors, index=self.code_list_process)
+      # factor_scaled_sum = factor_scaled_sum + pd.DataFrame(factor_scaled.loc[:,self.factors].sum(axis=1), index=self.code_list_process, columns=['scale_sum'])
+      factor_scaled = factor.rank(pct = True).droplevel(0)
+      factor_scaled_sum = factor_scaled_sum + factor_scaled.loc[:,self.factors].sum(axis=1).to_frame('scale_sum')
 
     factor_scaled_rank = factor_scaled_sum.sort_values(by = ['scale_sum'], ascending=False)
-    factor_scaled_rank.index = factor_scaled_rank.index.map(lambda x: '{:0>6s}'.format("'" + str(x)))
+    # factor_scaled_rank.index = factor_scaled_rank.index.map(lambda x: '{:0>6s}'.format("'" + str(x)))
     # factor_scaled_rank.index = [f'{idx:06d}' for idx in factor_scaled_rank.index]
     # factor_scaled_rank.index = [f'{idx:06d}' for idx in factor_scaled_rank.index]
     return factor_scaled_rank
 
 
 if __name__ == '__main__':
-  # code_list = ['600519', '000001', '000338', '600660', '000063']
+  code_list = ['600519', '000001', '000338', '600660', '000063']
   # code_list =  QA.QA_fetch_stock_block_adv().get_block("沪深300").code
   # code_list =  QA.QA_fetch_stock_block_adv().get_block("上证50").code
   code_list =  QA.QA_fetch_stock_block_adv().code

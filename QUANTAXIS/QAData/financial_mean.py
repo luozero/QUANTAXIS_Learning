@@ -622,5 +622,6 @@ financial_dict = {
     '577其中:子公司吸收少数股东投资收到的现金': 'cash received from minority shareholders investment in subsidiaries',
     '578其中:子公司支付给少数股东的股利利润': 'Dividends and profits paid by subsidiaries to minority shareholders',
     '579投资性房地产的折旧及摊销': 'Depreciation and amortization of investment properties',
-    '580信用减值损失': 'Credit impairment loss'
+    '580信用减值损失': 'Credit impairment loss',
+    '581备用581': 'unknown581'
 }
