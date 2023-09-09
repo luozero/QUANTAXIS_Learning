@@ -66,7 +66,7 @@ def QA_get_stock_basic():
     stock_sh = ak.stock_info_sh_name_code(symbol="主板A股")
     stock_sh = stock_sh[["证券代码", "证券简称", "上市日期"]]
 
-    stock_sz = ak.stock_info_sz_name_code(indicator="A股列表")
+    stock_sz = ak.stock_info_sz_name_code(symbol="A股列表")
     stock_sz["A股代码"] = stock_sz["A股代码"].astype(str).str.zfill(6)
     big_df = pd.concat([big_df, stock_sz[["A股代码", "A股简称", "A股上市日期"]]], ignore_index=True)
     big_df.columns = ["证券代码", "证券简称", "上市日期"]
